@@ -10,12 +10,12 @@ module challenge::day_01 {
     // Day 1: Basic module structure + primitive types
 
     // TODO: Define three constants to practice primitive types
-    //
+
+    const MY_AGE: u64 = 19;
+    const IS_STUDENT: bool = true;
+    const MY_WALLET: address = @0x1;
+    
     // Example format:
-    // const NUMBER: u64 = 42;
-    // const FLAG: bool = true;
-    // const MY_ADDRESS: address = @0x1;
-    //
     // Remember: Constants must be named in UPPERCASE!
 
 }
