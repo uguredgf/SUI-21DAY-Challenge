@@ -41,22 +41,39 @@ module challenge::day_11 {
     // - owner: address (the address that owns this board)
     // - tasks: vector<Task>
     // Add 'drop' ability
-    // public struct TaskBoard has drop {
-    //     // Your fields here
-    // }
+     public struct TaskBoard has drop {
+        owner: address,
+        tasks: vector<Task>,
+     }
 
     // TODO: Write a constructor 'new_board' that takes owner: address
     // and returns an empty TaskBoard
-    // public fun new_board(owner: address): TaskBoard {
-    //     // Your code here
-    // }
+     public fun new_board(owner: address): TaskBoard {
+        TaskBoard{
+            owner,
+            tasks: vector::empty<Task>(),
+        }
+     }
 
     // TODO: Write a function 'add_task' that:
     // - Takes board: &mut TaskBoard and task: Task
     // - Adds the task to the board's vector
     // The task becomes part of the board's data
-    // public fun add_task(board: &mut TaskBoard, task: Task) {
-    //     // Your code here
-    // }
+     public fun add_task(board: &mut TaskBoard, task: Task) {
+        vector::push_back(&mut board.tasks, task);
+     }
+
+
+#[test]
+fun test_board_logic(){
+    let user_addr = @0xACE;
+    let mut my_board = new_board(user_addr);
+
+    let task1 = new_task(b"Day 11 bitir.".to_string(),1000);
+    add_task(&mut my_board, task1);
+
+    assert!(vector::length(&my_board.tasks)==1,0);
+    assert!(my_board.owner == user_addr,1);
+}
 }
 
