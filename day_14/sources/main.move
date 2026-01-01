@@ -11,10 +11,14 @@ module challenge::day_14 {
     use std::vector;
     use std::string::String;
     use std::option::{Self, Option};
+    use std::debug;
+
+    const ERR_TASK_COUNT_MISMATCH: u64 = 0;
+    const ERR_COMPLETED_COUNT_MISMATCH: u64 = 1;
+    const ERR_TOTAL_REWARD_MISMATCH: u64 = 2;
 
     #[test_only]
     use std::unit_test::assert_eq;
-    use std::string;
 
     // Copy from day_13: All structs and functions
     public enum TaskStatus has copy, drop {
@@ -82,27 +86,49 @@ module challenge::day_14 {
         count
     }
 
-    // Note: assert! is a built-in macro in Move 2024 - no import needed!
+    #[test]
+    fun test_create_board_and_add_task(){
+        let mut board = new_board(@0x123);
+        let task_title = b"Study Move".to_string();
 
-    // TODO: Write at least 3 tests:
-    // 
-    // Test 1: test_create_board_and_add_task
-    // - Create a board with an owner
-    // - Add a task
-    // - Verify the task was added
-    // 
-    // Test 2: test_complete_task
-    // - Create board, add tasks
-    // - Complete a task
-    // - Verify completed_count is correct
-    // 
-    // Test 3: test_total_reward
-    // - Create board, add multiple tasks with different rewards
-    // - Verify total_reward is correct
-    // 
-    // #[test]
-    // fun test_create_board_and_add_task() {
-    //     // Your code here
-    // }
+        add_task(&mut board, new_task(task_title, 100));
+
+        let count = vector::length(&board.tasks);
+        assert!(count  == 1,  ERR_TASK_COUNT_MISMATCH);
+
+        debug::print(&b"Test 1: Board creation and add task passed!".to_string());
+    }
+
+    #[test]
+    fun test_complete_task(){
+        let mut board = new_board(@0x123);
+        add_task(&mut board, new_task(b"Task A".to_string(),100));
+        add_task(&mut board, new_task(b"Task B".to_string(),200));
+
+        let task_ref = vector::borrow_mut(&mut board.tasks, 0);
+        complete_task(task_ref);
+
+        let done_count = completed_count(&board);
+
+        assert_eq!(done_count, 1);
+
+        debug::print(&b"Task 2: Task completion passed!".to_string());
+    }
+    
+    #[test]
+    fun test_total_reward(){
+        let mut board = new_board(@0x123);
+
+        add_task(&mut board, new_task(b"Low".to_string(), 100));
+        add_task(&mut board, new_task(b"Mid".to_string(), 200));
+        add_task(&mut board, new_task(b"High".to_string(), 300));
+
+        let total = total_reward(&board);
+
+        assert!(total == 600, ERR_TOTAL_REWARD_MISMATCH);
+
+        debug::print(&b"Test 3: Total reward calculation passed!".to_string());
+    }
+
 }
 
