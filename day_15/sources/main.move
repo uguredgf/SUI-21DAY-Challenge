@@ -9,38 +9,64 @@
 /// We'll add UID and make it an object tomorrow.
 
 module challenge::day_15 {
-    // TODO: Define constants for plotId validation
-    // const MAX_PLOTS: u64 = 20;
-    // const E_PLOT_NOT_FOUND: u64 = 1;
-    // const E_PLOT_LIMIT_EXCEEDED: u64 = 2;
-    // const E_INVALID_PLOT_ID: u64 = 3;
-    // const E_PLOT_ALREADY_EXISTS: u64 = 4;
+    use std::vector;
+    
+    const MAX_PLOTS: u64 = 20;
+    const E_PLOT_NOT_FOUND: u64 = 4;
+    const E_PLOT_LIMIT_EXCEEDED: u64 = 1;
+    const E_INVALID_PLOT_ID: u64 = 2;
+    const E_PLOT_ALREADY_EXISTS: u64 = 3;
 
-    // TODO: Define a struct called 'FarmCounters' with:
-    // - planted: u64
-    // - harvested: u64
-    // - plots: vector<u8>
-    // Add 'copy', 'drop', and 'store' abilities
-    // (store is needed because we'll put this in an object later)
-    // public struct FarmCounters has copy, drop, store {
-    //     // Your fields here
-    // }
+    public struct FarmCounters has copy, drop, store {
+    planted: u64,
+    harvested: u64,
+    plots: vector<u8>,
+    }
 
-    // TODO: Write a constructor 'new_counters' that returns counters with zeros
-    // fun new_counters(): FarmCounters {
-    //     // Your code here (include plots: vector::empty())
-    // }
+    fun new_counters(): FarmCounters {
+    FarmCounters{
+        planted: 0,
+        harvested: 0,
+        plots: vector::empty<u8>()
+      }
+    }
 
-    // TODO: Write a function 'plant' that takes plotId: u8 and increments planted counter
-    // fun plant(counters: &mut FarmCounters, plotId: u8) {
-    //     // Your code here
-    //     // Validate plotId, check limits, prevent duplicates
-    // }
+    public fun plant(counters: &mut FarmCounters, plot_id: u8) {
+    
+    assert!(vector::length(&counters.plots)<MAX_PLOTS, E_PLOT_LIMIT_EXCEEDED);
 
-    // TODO: Write a function 'harvest' that takes plotId: u8 and increments harvested counter
-    // fun harvest(counters: &mut FarmCounters, plotId: u8) {
-    //     // Your code here
-    //     // Find and remove the plot from the vector
-    // }
+    let (found, _) = vector::index_of(&counters.plots, &plot_id);
+    assert!(!found, E_PLOT_ALREADY_EXISTS);
+
+    vector::push_back(&mut counters.plots, plot_id);
+    counters.planted = counters.planted + 1;
+
+    }
+
+    public fun harvest(counters: &mut FarmCounters, plot_id: u8) {
+
+        let (found, index) = vector::index_of(&counters.plots, &plot_id);
+        assert!(found, E_PLOT_NOT_FOUND);
+
+        vector::remove(&mut counters.plots, index);
+        counters.harvested = counters.harvested + 1;
+     }
+
+    #[test]
+    fun test_farm_flow(){
+        let mut counters = new_counters();
+
+        plant(&mut counters, 5);
+        plant(&mut counters, 10);
+        assert!(counters.planted == 2, 0);
+        assert!(vector::length(&counters.plots) == 2, 1);
+
+        harvest(&mut counters, 5);
+        assert!(counters.harvested == 1, 2);
+        assert!(vector::length(&counters.plots) == 1, 3);
+
+        let(found, _) = vector::index_of(&counters.plots, &10);
+        assert!(found, 4);
+    }
 }
 
