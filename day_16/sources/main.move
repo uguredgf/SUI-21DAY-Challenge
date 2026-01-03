@@ -10,6 +10,10 @@
 
 module challenge::day_16 {
 
+    use sui::object;
+    use sui::tx_context::TxContext;
+    use std::debug;
+
 
     // Copy from day_15: FarmCounters struct
     const MAX_PLOTS: u64 = 20;
@@ -32,7 +36,7 @@ module challenge::day_16 {
         }
     }
 
-    fun plant(counters: &mut FarmCounters, plotId: u8) {
+    public fun plant(counters: &mut FarmCounters, plotId: u8) {
         // Check if plotId is valid (between 1 and 20)
         assert!(plotId >= 1 && plotId <= (MAX_PLOTS as u8), E_INVALID_PLOT_ID);
         
@@ -52,7 +56,7 @@ module challenge::day_16 {
         vector::push_back(&mut counters.plots, plotId);
     }
 
-    fun harvest(counters: &mut FarmCounters, plotId: u8) {
+    public fun harvest(counters: &mut FarmCounters, plotId: u8) {
         let len = vector::length(&counters.plots);
                 
         // Check if plot exists in the vector and find its index
@@ -73,23 +77,29 @@ module challenge::day_16 {
         vector::remove(&mut counters.plots, found_index);
         counters.harvested = counters.harvested + 1;
     }
+    
+    public struct Farm has key {
+     id: object::UID,
+     counters: FarmCounters,
+     }
 
-    // TODO: Define a struct called 'Farm' with:
-    // - id: UID (this makes it a Sui object)
-    // - counters: FarmCounters
-    // Add 'key' ability (required for Sui objects)
-    // public struct Farm has key {
-    //     id: UID,
-    //     counters: FarmCounters,
-    // }
+    public fun new_farm(ctx: &mut TxContext): Farm {
+        Farm{
+            id: object::new(ctx),
+            counters: new_counters(),
+        }
+     }
 
-    // TODO: Write a constructor 'new_farm' that:
-    // - Takes ctx: &mut TxContext
-    // - Creates a UID using object::new(ctx)
-    // - Returns a Farm with the UID and default counters
-    // fun new_farm(ctx: &mut TxContext): Farm {
-    //     // Your code here
-    //     // Hint: let id = object::new(ctx);
-    // }
+     #[test]
+     fun test_create_farm(){
+        let mut ctx = sui::tx_context::dummy();
+        let farm = new_farm(&mut ctx);
+
+        assert!(farm.counters.planted == 0, 0);
+
+        let Farm { id, counters: _} = farm;
+        object::delete(id);
+
+        debug::print(&b"Sui Object Farm created successfully!".to_string());
+     }
 }
-
