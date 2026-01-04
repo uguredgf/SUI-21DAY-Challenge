@@ -9,6 +9,9 @@
 /// day_16/sources/solution.move if needed (note: plotId functionality has been added)
 
 module challenge::day_17 {
+    use sui::transfer;
+    use sui::object::{Self, UID};
+    use sui::tx_context::TxContext;
    
 
     // Copy from day_16: FarmCounters and Farm
@@ -86,26 +89,17 @@ module challenge::day_17 {
         }
     }
 
-    // TODO: Write an entry function 'create_farm' that:
-    // - Takes ctx: &mut TxContext
-    // - Creates a Farm using new_farm
-    // - Make it shareable object using transfer::share_object(farm)
-    // entry fun create_farm(ctx: &mut TxContext) {
-    //     // Your code here
-    // }
+     entry fun create_farm(ctx: &mut TxContext) {
+         let farm = new_farm(ctx);
+         transfer::share_object(farm);
+    }
 
-    // TODO: Write a function 'plant_on_farm' that:
-    // - Takes farm: &mut Farm, plotId: u8
-    // - Calls plant() on farm.counters with plotId
-    // fun plant_on_farm(farm: &mut Farm, plotId: u8) {
-    //     // Your code here
-    // }
+     fun plant_on_farm(farm: &mut Farm, plotId: u8) {
+        plant(&mut farm.counters, plotId);
+    }
 
-    // TODO: Write a function 'harvest_from_farm' that:
-    // - Takes farm: &mut Farm, plotId: u8
-    // - Calls harvest() on farm.counters with plotId
-    // fun harvest_from_farm(farm: &mut Farm, plotId: u8) {
-    //     // Your code here
-    // }
+     fun harvest_from_farm(farm: &mut Farm, plotId: u8) {
+        harvest(&mut farm.counters, plotId);
+     }
 }
 
