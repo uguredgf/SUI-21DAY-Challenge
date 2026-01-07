@@ -8,8 +8,8 @@
 /// Note: You can copy code from day_19/sources/solution.move if needed
 
 module challenge::day_20 {
-    // TODO: Import the event module here
-    // Hint: use sui::event;
+
+    use sui::event;
 
     const MAX_PLOTS: u64 = 20;
     const E_PLOT_NOT_FOUND: u64 = 1;
@@ -21,6 +21,15 @@ module challenge::day_20 {
         planted: u64,
         harvested: u64,
         plots: vector<u8>,
+    }
+
+    public struct PlantEvent has copy, drop{
+        planted_after: u64,
+    }
+
+    public struct Farm has key{
+        id: UID,
+        counters: FarmCounters,
     }
 
     fun new_counters(): FarmCounters {
@@ -73,11 +82,6 @@ module challenge::day_20 {
         counters.harvested = counters.harvested + 1;
     }
 
-    public struct Farm has key {
-        id: UID,
-        counters: FarmCounters,
-    }
-
     fun new_farm(ctx: &mut TxContext): Farm {
         Farm {
             id: object::new(ctx),
@@ -102,24 +106,23 @@ module challenge::day_20 {
         farm.counters.planted
     }
 
+    entry fun plant_on_farm_entry(farm: &mut Farm, plotId: u8){
+        plant_on_farm(farm, plotId);
+
+        let count = total_planted(farm);
+
+        event::emit(PlantEvent{
+            planted_after: count,
+        });
+    }
+
+    entry fun harvest_from_farm_entry(farm: &mut Farm, plotId: u8){
+        harvest_from_farm(farm, plotId);
+    }
+
     // Used in tests (see solution.move)
     fun total_harvested(farm: &Farm): u64 {
         farm.counters.harvested
     }
-
-    // TODO: Define an event struct called 'PlantEvent' that:
-    // - Has a field 'planted_after' of type u64
-    // - Has 'copy' and 'drop' abilities (required for events)
-    // - Is marked as 'public struct'
-
-    // TODO: Create/update the entry function 'plant_on_farm_entry' that:
-    // - Takes farm: &mut Farm and plotId: u8 as parameters
-    // - Calls plant_on_farm(farm, plotId) to plant
-    // - Gets the total planted count using total_planted(farm)
-    // - Emits a PlantEvent using event::emit() with the planted_after value
-
-    // TODO: Create the entry function 'harvest_from_farm_entry' that:
-    // - Takes farm: &mut Farm and plotId: u8 as parameters
-    // - Calls harvest_from_farm(farm, plotId) to harvest
 }
 
